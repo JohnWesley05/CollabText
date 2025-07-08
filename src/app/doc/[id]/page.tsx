@@ -46,7 +46,10 @@ function DocPageContent({ id }: { id: string }) {
         </div>
       </header>
       <main className="flex-grow p-4 md:p-6 lg:p-8">
-        <CollabEditor docId={id} />
+        <div className="max-w-4xl mx-auto">
+          <h1 className="text-4xl font-bold tracking-tight mb-4 text-foreground capitalize font-headline">{id}</h1>
+          <CollabEditor docId={id} />
+        </div>
       </main>
     </div>
   );

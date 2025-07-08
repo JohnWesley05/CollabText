@@ -32,7 +32,7 @@ export default function CollabEditor({ docId }: { docId: string }) {
 
   return (
     <LexicalComposer initialConfig={initialConfig}>
-      <div className="max-w-4xl mx-auto bg-card rounded-lg shadow-lg border">
+      <div className="bg-card rounded-lg shadow-lg border">
         <ToolbarPlugin />
         <div className="relative">
           <RichTextPlugin
