@@ -1,8 +1,11 @@
+'use client';
+
 import Link from 'next/link';
-import { ChevronLeft, PenSquare } from 'lucide-react';
+import { ChevronLeft, PenSquare, Users } from 'lucide-react';
 import CollabEditor from '@/components/CollabEditor';
 import { Button } from '@/components/ui/button';
 import { ThemeToggle } from '@/components/theme-toggle';
+import { CollaborationProvider, useCollaboration } from '@/context/CollaborationContext';
 
 type DocPageProps = {
   params: {
@@ -10,9 +13,18 @@ type DocPageProps = {
   };
 };
 
-export default function DocPage({ params }: DocPageProps) {
-  const { id } = params;
+function CollaboratorIndicator() {
+  const { collaboratorCount } = useCollaboration();
 
+  return (
+    <div className="flex items-center gap-1.5 py-1.5 px-3 rounded-lg bg-muted shadow-inner">
+      <Users className="w-5 h-5 text-muted-foreground" />
+      <span className="font-semibold text-muted-foreground">{collaboratorCount}</span>
+    </div>
+  );
+}
+
+function DocPageContent({ id }: { id: string }) {
   return (
     <div className="flex flex-col min-h-screen bg-background">
       <header className="sticky top-0 z-10 flex items-center justify-between px-4 py-2 border-b bg-background/80 backdrop-blur-sm">
@@ -26,6 +38,7 @@ export default function DocPage({ params }: DocPageProps) {
             <h1 className="text-xl font-semibold font-headline">CollabText</h1>
         </div>
         <div className="flex items-center gap-4">
+          <CollaboratorIndicator />
           <div className="text-sm text-muted-foreground">
             Document ID: <span className="font-mono p-1 rounded-md bg-muted">{id}</span>
           </div>
@@ -36,5 +49,15 @@ export default function DocPage({ params }: DocPageProps) {
         <CollabEditor docId={id} />
       </main>
     </div>
+  );
+}
+
+export default function DocPage({ params }: DocPageProps) {
+  const { id } = params;
+
+  return (
+    <CollaborationProvider>
+      <DocPageContent id={id} />
+    </CollaborationProvider>
   );
 }

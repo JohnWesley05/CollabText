@@ -6,6 +6,7 @@ import { createWebsocketProvider, randomUser } from '@/lib/collaboration';
 import { useEffect, useMemo } from 'react';
 import { $createParagraphNode, $getRoot, LexicalEditor } from 'lexical';
 import type { HistoryState } from '@lexical/history';
+import { useCollaboration } from '@/context/CollaborationContext';
 
 // CursorsContainer component is not explicitly needed as LexicalCollaborationPlugin handles it.
 // The cursors are appended to the body by default, or to a specified container ref.
@@ -47,6 +48,7 @@ const initialEditorState = (editor: LexicalEditor): void => {
 
 export function CollaborationPlugin({ id, historyState }: { id: string, historyState: HistoryState }) {
   const [editor] = useLexicalComposerContext();
+  const { setCollaboratorCount } = useCollaboration();
 
   const { name, color } = useMemo(() => randomUser(), []);
 
@@ -60,10 +62,19 @@ export function CollaborationPlugin({ id, historyState }: { id: string, historyS
     };
   }, []);
 
+  const providerFactory = useMemo(() => (docId: string, yjsDocMap: Map<string, any>) => {
+    const provider = createWebsocketProvider(docId, yjsDocMap);
+    provider.awareness.on('change', () => {
+      setCollaboratorCount(provider.awareness.getStates().size);
+    });
+    return provider;
+  }, [setCollaboratorCount]);
+
+
   return (
     <LexicalCollaborationPlugin
       id={id}
-      providerFactory={(id, yjsDocMap) => createWebsocketProvider(id, yjsDocMap)}
+      providerFactory={providerFactory}
       shouldBootstrap={true}
       username={name}
       cursorColor={color}
