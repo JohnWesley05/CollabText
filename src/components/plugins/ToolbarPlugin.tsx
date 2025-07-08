@@ -5,8 +5,12 @@ import {
   $getSelection,
   $isRangeSelection,
   $isTextNode,
+  CAN_REDO_COMMAND,
+  CAN_UNDO_COMMAND,
   FORMAT_ELEMENT_COMMAND,
   FORMAT_TEXT_COMMAND,
+  REDO_COMMAND,
+  UNDO_COMMAND,
 } from 'lexical';
 import {
   AlignCenter,
@@ -17,8 +21,10 @@ import {
   ChevronDown,
   CodeIcon,
   ItalicIcon,
+  Redo2,
   StrikethroughIcon,
   UnderlineIcon,
+  Undo2,
 } from 'lucide-react';
 import { useCallback, useEffect, useState } from 'react';
 import { $isLinkNode } from '@lexical/link';
@@ -44,6 +50,8 @@ type ToolbarState = {
   isAlignRight: boolean;
   isAlignJustify: boolean;
   fontFamily: string;
+  canUndo: boolean;
+  canRedo: boolean;
 };
 
 const FONT_OPTIONS = ['Arial', 'Inter', 'Roboto', 'Playfair Display'];
@@ -88,6 +96,8 @@ export default function ToolbarPlugin() {
     isAlignRight: false,
     isAlignJustify: false,
     fontFamily: 'Arial',
+    canUndo: false,
+    canRedo: false,
   });
 
   const updateToolbar = useCallback(() => {
@@ -106,7 +116,8 @@ export default function ToolbarPlugin() {
       const style = anchorNode.getStyle();
       const fontFamily = getStyleProperty(style, 'font-family') || 'Arial';
 
-      setToolbarState({
+      setToolbarState(s => ({
+        ...s,
         isBold: selection.hasFormat('bold'),
         isItalic: selection.hasFormat('italic'),
         isUnderline: selection.hasFormat('underline'),
@@ -118,7 +129,7 @@ export default function ToolbarPlugin() {
         isAlignRight: formatType === 'right',
         isAlignJustify: formatType === 'justify',
         fontFamily,
-      });
+      }));
     }
   }, [editor]);
 
@@ -129,6 +140,22 @@ export default function ToolbarPlugin() {
           updateToolbar();
         });
       }),
+      editor.registerCommand(
+        CAN_UNDO_COMMAND,
+        (payload) => {
+          setToolbarState((s) => ({ ...s, canUndo: payload }));
+          return false;
+        },
+        1,
+      ),
+      editor.registerCommand(
+        CAN_REDO_COMMAND,
+        (payload) => {
+          setToolbarState((s) => ({ ...s, canRedo: payload }));
+          return false;
+        },
+        1,
+      ),
     );
   }, [updateToolbar, editor]);
   
@@ -158,6 +185,13 @@ export default function ToolbarPlugin() {
 
   return (
     <div className="flex flex-wrap items-center gap-1 p-2 border-b bg-muted/50 rounded-t-lg">
+      <Button disabled={!toolbarState.canUndo} variant={'ghost'} size="icon" onClick={() => editor.dispatchCommand(UNDO_COMMAND, undefined)} aria-label="Undo">
+        <Undo2 className="w-4 h-4" />
+      </Button>
+      <Button disabled={!toolbarState.canRedo} variant={'ghost'} size="icon" onClick={() => editor.dispatchCommand(REDO_COMMAND, undefined)} aria-label="Redo">
+        <Redo2 className="w-4 h-4" />
+      </Button>
+      <Separator orientation="vertical" className="h-6 mx-1" />
       <Button variant={toolbarState.isBold ? 'secondary' : 'ghost'} size="icon" onClick={() => formatText('bold')} aria-label="Format Bold">
         <BoldIcon className="w-4 h-4" />
       </Button>
