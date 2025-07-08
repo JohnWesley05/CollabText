@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { ChevronLeft, PenSquare } from 'lucide-react';
 import CollabEditor from '@/components/CollabEditor';
 import { Button } from '@/components/ui/button';
+import { ThemeToggle } from '@/components/theme-toggle';
 
 type DocPageProps = {
   params: {
@@ -24,8 +25,11 @@ export default function DocPage({ params }: DocPageProps) {
             <PenSquare className="w-6 h-6 text-primary" />
             <h1 className="text-xl font-semibold font-headline">CollabText</h1>
         </div>
-        <div className="text-sm text-muted-foreground">
-          Document ID: <span className="font-mono p-1 rounded-md bg-muted">{id}</span>
+        <div className="flex items-center gap-4">
+          <div className="text-sm text-muted-foreground">
+            Document ID: <span className="font-mono p-1 rounded-md bg-muted">{id}</span>
+          </div>
+          <ThemeToggle />
         </div>
       </header>
       <main className="flex-grow p-4 md:p-6 lg:p-8">

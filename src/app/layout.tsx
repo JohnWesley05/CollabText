@@ -1,11 +1,11 @@
 import type {Metadata} from 'next';
 import './globals.css';
 import { Toaster } from "@/components/ui/toaster"
+import { ThemeProvider } from '@/components/theme-provider';
 
 export const metadata: Metadata = {
   title: 'CollabText',
   description: 'Real-time collaborative rich-text editor',
-  icons: null,
 };
 
 export default function RootLayout({
@@ -21,8 +21,12 @@ export default function RootLayout({
         <link href="https://fonts.googleapis.com/css2?family=Inter&display=swap" rel="stylesheet" />
       </head>
       <body className="font-body antialiased bg-background text-foreground">
-        {children}
-        <Toaster />
+        <ThemeProvider
+          storageKey="collabtext-theme"
+        >
+          {children}
+          <Toaster />
+        </ThemeProvider>
       </body>
     </html>
   );
