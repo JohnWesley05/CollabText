@@ -13,6 +13,8 @@ export default {
         body: ['Inter', 'sans-serif'],
         headline: ['Inter', 'sans-serif'],
         code: ['monospace'],
+        roboto: ['Roboto', 'sans-serif'],
+        playfair: ['"Playfair Display"', 'serif'],
       },
       colors: {
         background: 'hsl(var(--background))',

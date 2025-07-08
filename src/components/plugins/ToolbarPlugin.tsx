@@ -4,6 +4,7 @@ import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext
 import {
   $getSelection,
   $isRangeSelection,
+  $isTextNode,
   FORMAT_ELEMENT_COMMAND,
   FORMAT_TEXT_COMMAND,
 } from 'lexical';
@@ -13,6 +14,7 @@ import {
   AlignLeft,
   AlignRight,
   BoldIcon,
+  ChevronDown,
   CodeIcon,
   ItalicIcon,
   StrikethroughIcon,
@@ -23,6 +25,12 @@ import { $isLinkNode } from '@lexical/link';
 import { mergeRegister } from '@lexical/utils';
 import { Button } from '../ui/button';
 import { Separator } from '../ui/separator';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '../ui/dropdown-menu';
 
 type ToolbarState = {
   isBold: boolean;
@@ -35,7 +43,36 @@ type ToolbarState = {
   isAlignCenter: boolean;
   isAlignRight: boolean;
   isAlignJustify: boolean;
+  fontFamily: string;
 };
+
+const FONT_OPTIONS = ['Arial', 'Inter', 'Roboto', 'Playfair Display'];
+
+const getStyleProperty = (style: string, property: string): string => {
+    const styleObj = (style || '').split(';')
+        .filter(s => s.trim())
+        .reduce((acc, s) => {
+            const [key, val] = s.split(':').map(p => p.trim());
+            if (key && val) acc[key] = val;
+            return acc;
+        }, {} as Record<string, string>);
+    return styleObj[property] || '';
+};
+
+const setStyleProperty = (style: string, property: string, value: string): string => {
+    const styleObj = (style || '').split(';')
+        .filter(s => s.trim())
+        .reduce((acc, s) => {
+            const [key, val] = s.split(':').map(p => p.trim());
+            if (key && val) acc[key] = val;
+            return acc;
+        }, {} as Record<string, string>);
+    styleObj[property] = value;
+    return Object.entries(styleObj)
+        .map(([key, val]) => `${key}: ${val}`)
+        .join('; ');
+};
+
 
 export default function ToolbarPlugin() {
   const [editor] = useLexicalComposerContext();
@@ -50,6 +87,7 @@ export default function ToolbarPlugin() {
     isAlignCenter: false,
     isAlignRight: false,
     isAlignJustify: false,
+    fontFamily: 'Arial',
   });
 
   const updateToolbar = useCallback(() => {
@@ -64,6 +102,9 @@ export default function ToolbarPlugin() {
       const elementDOM = editor.getElementByKey(elementKey);
       
       const formatType = element.getFormatType();
+      
+      const style = anchorNode.getStyle();
+      const fontFamily = getStyleProperty(style, 'font-family') || 'Arial';
 
       setToolbarState({
         isBold: selection.hasFormat('bold'),
@@ -76,6 +117,7 @@ export default function ToolbarPlugin() {
         isAlignCenter: formatType === 'center',
         isAlignRight: formatType === 'right',
         isAlignJustify: formatType === 'justify',
+        fontFamily,
       });
     }
   }, [editor]);
@@ -98,8 +140,24 @@ export default function ToolbarPlugin() {
     editor.dispatchCommand(FORMAT_ELEMENT_COMMAND, command);
   };
 
+  const applyFontFamily = (fontFamily: string) => {
+    editor.update(() => {
+        const selection = $getSelection();
+        if ($isRangeSelection(selection)) {
+            selection.getNodes().forEach(node => {
+                if ($isTextNode(node)) {
+                    const writableNode = node.getWritable();
+                    const style = writableNode.getStyle();
+                    const newStyle = setStyleProperty(style, 'font-family', fontFamily);
+                    writableNode.setStyle(newStyle);
+                }
+            });
+        }
+    });
+  };
+
   return (
-    <div className="flex items-center gap-1 p-2 border-b bg-muted/50 rounded-t-lg">
+    <div className="flex flex-wrap items-center gap-1 p-2 border-b bg-muted/50 rounded-t-lg">
       <Button variant={toolbarState.isBold ? 'secondary' : 'ghost'} size="icon" onClick={() => formatText('bold')} aria-label="Format Bold">
         <BoldIcon className="w-4 h-4" />
       </Button>
@@ -115,6 +173,22 @@ export default function ToolbarPlugin() {
       <Button variant={toolbarState.isCode ? 'secondary' : 'ghost'} size="icon" onClick={() => formatText('code')} aria-label="Format Code">
         <CodeIcon className="w-4 h-4" />
       </Button>
+      <Separator orientation="vertical" className="h-6 mx-1" />
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button variant="ghost" className="w-32 justify-between">
+            <span className="truncate" style={{fontFamily: toolbarState.fontFamily}}>{toolbarState.fontFamily}</span>
+            <ChevronDown className="w-4 h-4" />
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent>
+          {FONT_OPTIONS.map(font => (
+            <DropdownMenuItem key={font} onSelect={() => applyFontFamily(font)} className="cursor-pointer">
+              <span style={{ fontFamily: font }}>{font}</span>
+            </DropdownMenuItem>
+          ))}
+        </DropdownMenuContent>
+      </DropdownMenu>
       <Separator orientation="vertical" className="h-6 mx-1" />
       <Button variant={toolbarState.isAlignLeft ? 'secondary' : 'ghost'} size="icon" onClick={() => formatElement('left')} aria-label="Align Left">
         <AlignLeft className="w-4 h-4" />
