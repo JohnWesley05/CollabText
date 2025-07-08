@@ -113,7 +113,7 @@ export default function ToolbarPlugin() {
       
       const formatType = element.getFormatType();
       
-      const style = anchorNode.getStyle();
+      const style = $isTextNode(anchorNode) ? anchorNode.getStyle() : '';
       const fontFamily = getStyleProperty(style, 'font-family') || 'Arial';
 
       setToolbarState(s => ({
