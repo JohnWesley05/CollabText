@@ -21,22 +21,34 @@ class BroadcastChannelProvider extends Observable<any> {
   private bc: BroadcastChannel;
   private doc: Y.Doc;
 
+  // Store handlers to be able to remove them on disconnect
+  private readonly _docUpdateHandler: (update: Uint8Array, origin: any) => void;
+  private readonly _awarenessUpdateHandler: (changes: any, origin: any) => void;
+
   constructor(roomName: string, doc: Y.Doc) {
     super();
     this.doc = doc;
     this.awareness = new Awareness(doc);
     this.bc = new BroadcastChannel(roomName);
 
-    this.doc.on('update', (update: Uint8Array) => {
-      this.bc.postMessage({ type: 'update', update });
-    });
+    this._docUpdateHandler = (update: Uint8Array, origin) => {
+      // Don't broadcast updates that came from this provider
+      if (origin !== this) {
+        this.bc.postMessage({ type: 'update', update });
+      }
+    };
+    this.doc.on('update', this._docUpdateHandler);
 
-    this.awareness.on('update', (changes: any) => {
+    this._awarenessUpdateHandler = (changes: any, origin) => {
+       // Don't broadcast awareness updates that came from this provider
+      if (origin !== this) {
         this.bc.postMessage({
             type: 'awareness',
             awareness: this.awareness.getStates(),
         });
-    });
+      }
+    };
+    this.awareness.on('update', this._awarenessUpdateHandler);
 
     this.bc.onmessage = (event) => {
       const { type, update, awareness } = event.data;
@@ -55,6 +67,11 @@ class BroadcastChannelProvider extends Observable<any> {
   }
 
   public disconnect() {
+    // Remove event listeners before closing the channel
+    this.doc.off('update', this._docUpdateHandler);
+    this.awareness.off('update', this._awarenessUpdateHandler);
+    this.bc.onmessage = null;
+
     bcConnected.current = false;
     this.emit('status', [{ status: 'disconnected' }]);
     this.bc.close();
