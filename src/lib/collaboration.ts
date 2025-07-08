@@ -1,5 +1,5 @@
 import * as Y from 'yjs';
-import { Awareness } from 'y-protocols/awareness';
+import { Awareness, applyAwarenessUpdate, encodeAwarenessUpdate } from 'y-protocols/awareness';
 import { Observable } from 'lib0/observable';
 
 const USER_COLORS = ['#A0CFEC', '#8FBC8F', '#F4A261', '#E76F51', '#2A9D8F'];
@@ -56,7 +56,7 @@ class BroadcastChannelProvider extends Observable<any> {
         if (changedStates.size > 0) {
           this.bc.postMessage({
               type: 'awareness',
-              awareness: Awareness.encodeAwarenessUpdate(this.awareness, changedClients),
+              awareness: encodeAwarenessUpdate(this.awareness, changedClients),
           });
         }
       }
@@ -68,7 +68,7 @@ class BroadcastChannelProvider extends Observable<any> {
       if (type === 'update' && update) {
         Y.applyUpdate(this.doc, new Uint8Array(update), this);
       } else if (type === 'awareness' && awareness) {
-        Awareness.applyAwarenessUpdate(this.awareness, new Uint8Array(awareness), this);
+        applyAwarenessUpdate(this.awareness, new Uint8Array(awareness), this);
       }
     };
     this.bc.addEventListener('message', this._bcMessageHandler);
