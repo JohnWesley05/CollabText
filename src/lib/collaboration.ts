@@ -13,7 +13,6 @@ export const randomUser = () => ({
   color: USER_COLORS[Math.floor(Math.random() * USER_COLORS.length)],
 });
 
-const bcReady = { current: false };
 const bcConnected = { current: false };
 
 class BroadcastChannelProvider extends Observable<any> {
@@ -23,7 +22,7 @@ class BroadcastChannelProvider extends Observable<any> {
 
   // Store handlers to be able to remove them on disconnect
   private readonly _docUpdateHandler: (update: Uint8Array, origin: any) => void;
-  private readonly _awarenessUpdateHandler: (changes: { added: number[], updated: number[], removed: number[] }, origin: any) => void;
+  private readonly _awarenessChangeHandler: (changes: { added: number[], updated: number[], removed: number[] }, origin: any) => void;
   private readonly _bcMessageHandler: (event: MessageEvent) => void;
 
 
@@ -41,27 +40,18 @@ class BroadcastChannelProvider extends Observable<any> {
     };
     this.doc.on('update', this._docUpdateHandler);
 
-    this._awarenessUpdateHandler = ({ added, updated, removed }, origin) => {
-       // Don't broadcast awareness updates that came from this provider
-      if (origin !== this) {
+    this._awarenessChangeHandler = ({ added, updated, removed }, origin) => {
+       // Only broadcast local awareness changes
+      if (origin === 'local') {
         const changedClients = added.concat(updated, removed);
-        const states = this.awareness.getStates();
-        const changedStates = new Map();
-        for (const clientID of changedClients) {
-          const state = states.get(clientID);
-          if (state) {
-            changedStates.set(clientID, state);
-          }
-        }
-        if (changedStates.size > 0) {
-          this.bc.postMessage({
-              type: 'awareness',
-              awareness: encodeAwarenessUpdate(this.awareness, changedClients),
-          });
-        }
+        const awarenessUpdate = encodeAwarenessUpdate(this.awareness, changedClients);
+        this.bc.postMessage({
+            type: 'awareness',
+            awareness: awarenessUpdate,
+        });
       }
     };
-    this.awareness.on('update', this._awarenessUpdateHandler);
+    this.awareness.on('change', this._awarenessChangeHandler);
 
     this._bcMessageHandler = (event) => {
       const { type, update, awareness } = event.data;
@@ -82,7 +72,7 @@ class BroadcastChannelProvider extends Observable<any> {
 
   public disconnect() {
     this.doc.off('update', this._docUpdateHandler);
-    this.awareness.off('update', this._awarenessUpdateHandler);
+    this.awareness.off('change', this._awarenessChangeHandler);
     this.bc.removeEventListener('message', this._bcMessageHandler);
     
     bcConnected.current = false;

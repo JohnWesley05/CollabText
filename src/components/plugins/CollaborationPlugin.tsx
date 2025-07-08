@@ -4,6 +4,7 @@ import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext
 import { CollaborationPlugin as LexicalCollaborationPlugin } from '@lexical/react/LexicalCollaborationPlugin';
 import { createWebsocketProvider, randomUser } from '@/lib/collaboration';
 import { useEffect, useMemo } from 'react';
+import { $createParagraphNode, $getRoot, LexicalEditor } from 'lexical';
 
 // CursorsContainer component is not explicitly needed as LexicalCollaborationPlugin handles it.
 // The cursors are appended to the body by default, or to a specified container ref.
@@ -34,6 +35,15 @@ const CursorsCSS = `
   }
 `;
 
+const initialEditorState = (editor: LexicalEditor): void => {
+  const root = $getRoot();
+  if (root.isEmpty()) {
+    const p = $createParagraphNode();
+    root.append(p);
+  }
+};
+
+
 export function CollaborationPlugin({ id }: { id: string }) {
   const [editor] = useLexicalComposerContext();
 
@@ -56,7 +66,7 @@ export function CollaborationPlugin({ id }: { id: string }) {
       shouldBootstrap={true}
       username={name}
       cursorColor={color}
-      initialEditorState={null}
+      initialEditorState={initialEditorState}
     />
   );
 }
