@@ -2,6 +2,7 @@
 
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
 import { CollaborationPlugin as LexicalCollaborationPlugin } from '@lexical/react/LexicalCollaborationPlugin';
+import { useHistory } from '@lexical/react/LexicalHistoryPlugin';
 import { createWebsocketProvider, randomUser } from '@/lib/collaboration';
 import { useEffect, useMemo } from 'react';
 import { $createParagraphNode, $getRoot, LexicalEditor } from 'lexical';
@@ -46,6 +47,7 @@ const initialEditorState = (editor: LexicalEditor): void => {
 
 export function CollaborationPlugin({ id }: { id: string }) {
   const [editor] = useLexicalComposerContext();
+  const historyState = useHistory(editor);
 
   const { name, color } = useMemo(() => randomUser(), []);
 
@@ -67,6 +69,8 @@ export function CollaborationPlugin({ id }: { id: string }) {
       username={name}
       cursorColor={color}
       initialEditorState={initialEditorState}
+      // @ts-expect-error collabHistory is not in the public types
+      collabHistory={historyState}
     />
   );
 }
