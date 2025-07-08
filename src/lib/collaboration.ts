@@ -23,7 +23,9 @@ class BroadcastChannelProvider extends Observable<any> {
 
   // Store handlers to be able to remove them on disconnect
   private readonly _docUpdateHandler: (update: Uint8Array, origin: any) => void;
-  private readonly _awarenessUpdateHandler: (changes: any, origin: any) => void;
+  private readonly _awarenessUpdateHandler: (changes: { added: number[], updated: number[], removed: number[] }, origin: any) => void;
+  private readonly _bcMessageHandler: (event: MessageEvent) => void;
+
 
   constructor(roomName: string, doc: Y.Doc) {
     super();
@@ -31,7 +33,7 @@ class BroadcastChannelProvider extends Observable<any> {
     this.awareness = new Awareness(doc);
     this.bc = new BroadcastChannel(roomName);
 
-    this._docUpdateHandler = (update: Uint8Array, origin) => {
+    this._docUpdateHandler = (update: Uint8Array, origin: any) => {
       // Don't broadcast updates that came from this provider
       if (origin !== this) {
         this.bc.postMessage({ type: 'update', update });
@@ -39,25 +41,37 @@ class BroadcastChannelProvider extends Observable<any> {
     };
     this.doc.on('update', this._docUpdateHandler);
 
-    this._awarenessUpdateHandler = (changes: any, origin) => {
+    this._awarenessUpdateHandler = ({ added, updated, removed }, origin) => {
        // Don't broadcast awareness updates that came from this provider
       if (origin !== this) {
-        this.bc.postMessage({
-            type: 'awareness',
-            awareness: this.awareness.getStates(),
-        });
+        const changedClients = added.concat(updated, removed);
+        const states = this.awareness.getStates();
+        const changedStates = new Map();
+        for (const clientID of changedClients) {
+          const state = states.get(clientID);
+          if (state) {
+            changedStates.set(clientID, state);
+          }
+        }
+        if (changedStates.size > 0) {
+          this.bc.postMessage({
+              type: 'awareness',
+              awareness: Awareness.encodeAwarenessUpdate(this.awareness, changedClients),
+          });
+        }
       }
     };
     this.awareness.on('update', this._awarenessUpdateHandler);
 
-    this.bc.onmessage = (event) => {
+    this._bcMessageHandler = (event) => {
       const { type, update, awareness } = event.data;
       if (type === 'update' && update) {
         Y.applyUpdate(this.doc, new Uint8Array(update), this);
       } else if (type === 'awareness' && awareness) {
-        Awareness.applyAwarenessUpdate(this.awareness, new Uint8Array(Object.values(awareness)), this);
+        Awareness.applyAwarenessUpdate(this.awareness, new Uint8Array(awareness), this);
       }
     };
+    this.bc.addEventListener('message', this._bcMessageHandler);
   }
 
   public connect() {
@@ -67,11 +81,10 @@ class BroadcastChannelProvider extends Observable<any> {
   }
 
   public disconnect() {
-    // Remove event listeners before closing the channel
     this.doc.off('update', this._docUpdateHandler);
     this.awareness.off('update', this._awarenessUpdateHandler);
-    this.bc.onmessage = null;
-
+    this.bc.removeEventListener('message', this._bcMessageHandler);
+    
     bcConnected.current = false;
     this.emit('status', [{ status: 'disconnected' }]);
     this.bc.close();
@@ -83,8 +96,6 @@ export function createWebsocketProvider(id: string, yjsDocMap: Map<string, Y.Doc
   if (doc === undefined) {
     doc = new Y.Doc();
     yjsDocMap.set(id, doc);
-  } else {
-    doc.load();
   }
   return new BroadcastChannelProvider(id, doc);
 }
