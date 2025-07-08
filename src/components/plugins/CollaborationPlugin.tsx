@@ -2,10 +2,10 @@
 
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
 import { CollaborationPlugin as LexicalCollaborationPlugin } from '@lexical/react/LexicalCollaborationPlugin';
-import { useHistory } from '@lexical/react/LexicalHistoryPlugin';
 import { createWebsocketProvider, randomUser } from '@/lib/collaboration';
 import { useEffect, useMemo } from 'react';
 import { $createParagraphNode, $getRoot, LexicalEditor } from 'lexical';
+import type { HistoryState } from '@lexical/history';
 
 // CursorsContainer component is not explicitly needed as LexicalCollaborationPlugin handles it.
 // The cursors are appended to the body by default, or to a specified container ref.
@@ -45,9 +45,8 @@ const initialEditorState = (editor: LexicalEditor): void => {
 };
 
 
-export function CollaborationPlugin({ id }: { id: string }) {
+export function CollaborationPlugin({ id, historyState }: { id: string, historyState: HistoryState }) {
   const [editor] = useLexicalComposerContext();
-  const historyState = useHistory(editor);
 
   const { name, color } = useMemo(() => randomUser(), []);
 
