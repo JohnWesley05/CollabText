@@ -4,7 +4,6 @@ import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext
 import { CollaborationPlugin as LexicalCollaborationPlugin } from '@lexical/react/LexicalCollaborationPlugin';
 import { createWebsocketProvider, randomUser } from '@/lib/collaboration';
 import { useEffect, useMemo } from 'react';
-import { useCollaborationContext } from '@lexical/yjs';
 
 // CursorsContainer component is not explicitly needed as LexicalCollaborationPlugin handles it.
 // The cursors are appended to the body by default, or to a specified container ref.
@@ -37,7 +36,6 @@ const CursorsCSS = `
 
 export function CollaborationPlugin({ id }: { id: string }) {
   const [editor] = useLexicalComposerContext();
-  const { yjsDocMap } = useCollaborationContext();
 
   const { name, color } = useMemo(() => randomUser(), []);
 
@@ -55,7 +53,7 @@ export function CollaborationPlugin({ id }: { id: string }) {
     <LexicalCollaborationPlugin
       id={id}
       providerFactory={(id, yjsDocMap) => createWebsocketProvider(id, yjsDocMap)}
-      shouldBootstrap={!yjsDocMap.has(id)}
+      shouldBootstrap={true}
       username={name}
       cursorColor={color}
       initialEditorState={null}

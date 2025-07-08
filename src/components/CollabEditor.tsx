@@ -11,17 +11,14 @@ import { EditorNodes } from '@/lib/editor-nodes';
 import { EditorTheme } from '@/lib/editor-theme';
 import ToolbarPlugin from './plugins/ToolbarPlugin';
 import { CollaborationPlugin } from './plugins/CollaborationPlugin';
-import { useCollaborationContext } from '@lexical/yjs';
 
 function Placeholder() {
   return <div className="absolute top-4 left-4 text-muted-foreground pointer-events-none">Start typing...</div>;
 }
 
 export default function CollabEditor({ docId }: { docId: string }) {
-  const { yjsDocMap } = useCollaborationContext();
-
   const initialConfig = {
-    editorState: yjsDocMap.get('main') ? null : undefined,
+    editorState: undefined,
     namespace: 'CollabTextEditor',
     nodes: [...EditorNodes],
     onError: (error: Error) => {
