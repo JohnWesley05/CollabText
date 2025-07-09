@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { useParams } from 'next/navigation';
+import { useParams, useSearchParams } from 'next/navigation';
 import { ChevronLeft, PenSquare } from 'lucide-react';
 import CollabEditor from '@/components/CollabEditor';
 import { Button } from '@/components/ui/button';
@@ -37,7 +37,9 @@ function CollaboratorIndicator() {
 
 function DocPageContent() {
   const params = useParams();
+  const searchParams = useSearchParams();
   const id = params.id as string;
+  const username = searchParams.get('name') || undefined;
 
   return (
     <div className="flex flex-col min-h-screen bg-background">
@@ -62,7 +64,7 @@ function DocPageContent() {
       <main className="flex-grow p-4 md:p-6 lg:p-8">
         <div className="max-w-4xl mx-auto">
           <h1 className="text-4xl font-bold tracking-tight mb-4 text-foreground capitalize font-headline">{id}</h1>
-          <CollabEditor docId={id} />
+          <CollabEditor docId={id} username={username} />
         </div>
       </main>
     </div>

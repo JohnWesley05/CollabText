@@ -18,17 +18,20 @@ import { ThemeToggle } from '@/components/theme-toggle';
 
 export default function Home() {
   const [docId, setDocId] = useState('');
+  const [name, setName] = useState('');
   const router = useRouter();
 
   const handleJoinRoom = () => {
-    if (docId.trim()) {
-      router.push(`/doc/${docId.trim()}`);
+    if (docId.trim() && name.trim()) {
+      router.push(`/doc/${docId.trim()}?name=${encodeURIComponent(name.trim())}`);
     }
   };
   
   const handleCreateRoom = () => {
-    const newDocId = Math.random().toString(36).substring(2, 10);
-    router.push(`/doc/${newDocId}`);
+    if (name.trim()) {
+      const newDocId = Math.random().toString(36).substring(2, 10);
+      router.push(`/doc/${newDocId}?name=${encodeURIComponent(name.trim())}`);
+    }
   }
 
   return (
@@ -43,17 +46,25 @@ export default function Home() {
             <CardTitle className="text-3xl font-headline">CollabText</CardTitle>
           </div>
           <CardDescription>
-            Enter a document ID to join a room and start collaborating in
-            real-time.
+            Enter your name and a document ID to start collaborating.
           </CardDescription>
         </CardHeader>
         <CardContent>
           <div className="grid w-full items-center gap-4">
             <div className="flex flex-col space-y-1.5">
+              <Label htmlFor="name">Your Name</Label>
+              <Input
+                id="name"
+                placeholder="Enter your name"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+              />
+            </div>
+            <div className="flex flex-col space-y-1.5">
               <Label htmlFor="docId">Document ID</Label>
               <Input
                 id="docId"
-                placeholder="Enter document ID"
+                placeholder="Enter document ID to join"
                 value={docId}
                 onChange={(e) => setDocId(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && handleJoinRoom()}
@@ -65,7 +76,7 @@ export default function Home() {
           <Button
             onClick={handleJoinRoom}
             className="w-full"
-            disabled={!docId.trim()}
+            disabled={!docId.trim() || !name.trim()}
           >
             Join Room
           </Button>
@@ -78,6 +89,7 @@ export default function Home() {
             onClick={handleCreateRoom}
             className="w-full"
             variant="secondary"
+            disabled={!name.trim()}
           >
             Create a New Document
           </Button>

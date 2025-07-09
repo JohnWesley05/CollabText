@@ -17,7 +17,7 @@ function Placeholder() {
   return <div className="absolute top-4 left-4 text-muted-foreground pointer-events-none">Start typing...</div>;
 }
 
-export default function CollabEditor({ docId }: { docId: string }) {
+export default function CollabEditor({ docId, username }: { docId: string; username?: string }) {
   const initialConfig = {
     editorState: undefined,
     namespace: 'CollabTextEditor',
@@ -44,7 +44,7 @@ export default function CollabEditor({ docId }: { docId: string }) {
           />
           <AutoFocusPlugin />
           <HistoryPlugin externalHistoryState={history} />
-          <CollaborationPlugin id={docId} historyState={history} />
+          <CollaborationPlugin id={docId} historyState={history} username={username} />
         </div>
       </div>
     </LexicalComposer>

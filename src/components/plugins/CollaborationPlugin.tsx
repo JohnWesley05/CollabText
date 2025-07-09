@@ -46,11 +46,17 @@ const initialEditorState = (editor: LexicalEditor): void => {
 };
 
 
-export function CollaborationPlugin({ id, historyState }: { id: string, historyState: HistoryState }) {
+export function CollaborationPlugin({ id, historyState, username }: { id: string, historyState: HistoryState, username?: string }) {
   const [editor] = useLexicalComposerContext();
   const { setCollaborators } = useCollaboration();
 
-  const { name, color } = useMemo(() => randomUser(), []);
+  const { name, color } = useMemo(() => {
+    const random = randomUser();
+    return {
+      name: username || random.name,
+      color: random.color,
+    };
+  }, [username]);
 
   useEffect(() => {
     // Add cursor styles to the head
