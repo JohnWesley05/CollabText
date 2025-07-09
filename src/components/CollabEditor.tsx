@@ -5,8 +5,6 @@ import { RichTextPlugin } from '@lexical/react/LexicalRichTextPlugin';
 import { ContentEditable } from '@lexical/react/LexicalContentEditable';
 import { AutoFocusPlugin } from '@lexical/react/LexicalAutoFocusPlugin';
 import LexicalErrorBoundary from '@lexical/react/LexicalErrorBoundary';
-import { HistoryPlugin, createEmptyHistoryState } from '@lexical/react/LexicalHistoryPlugin';
-import { useMemo } from 'react';
 
 import { EditorNodes } from '@/lib/editor-nodes';
 import { EditorTheme } from '@/lib/editor-theme';
@@ -28,8 +26,6 @@ export default function CollabEditor({ docId, username }: { docId: string; usern
     theme: EditorTheme,
   };
 
-  const history = useMemo(() => createEmptyHistoryState(), []);
-
   return (
     <LexicalComposer initialConfig={initialConfig}>
       <div className="bg-card rounded-lg shadow-lg border">
@@ -43,8 +39,7 @@ export default function CollabEditor({ docId, username }: { docId: string; usern
             ErrorBoundary={LexicalErrorBoundary}
           />
           <AutoFocusPlugin />
-          <HistoryPlugin externalHistoryState={history} />
-          <CollaborationPlugin id={docId} historyState={history} username={username} />
+          <CollaborationPlugin id={docId} username={username} />
         </div>
       </div>
     </LexicalComposer>

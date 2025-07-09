@@ -5,7 +5,6 @@ import { CollaborationPlugin as LexicalCollaborationPlugin } from '@lexical/reac
 import { createWebsocketProvider, randomUser } from '@/lib/collaboration';
 import { useEffect, useMemo } from 'react';
 import { $createParagraphNode, $getRoot, LexicalEditor } from 'lexical';
-import type { HistoryState } from '@lexical/history';
 import { useCollaboration } from '@/context/CollaborationContext';
 
 // CursorsContainer component is not explicitly needed as LexicalCollaborationPlugin handles it.
@@ -46,7 +45,7 @@ const initialEditorState = (editor: LexicalEditor): void => {
 };
 
 
-export function CollaborationPlugin({ id, historyState, username }: { id: string, historyState: HistoryState, username?: string }) {
+export function CollaborationPlugin({ id, username }: { id: string, username?: string }) {
   const [editor] = useLexicalComposerContext();
   const { setCollaborators } = useCollaboration();
 
@@ -93,8 +92,6 @@ export function CollaborationPlugin({ id, historyState, username }: { id: string
       username={name}
       cursorColor={color}
       initialEditorState={initialEditorState}
-      // @ts-expect-error collabHistory is not in the public types
-      collabHistory={historyState}
     />
   );
 }
