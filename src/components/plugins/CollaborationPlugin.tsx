@@ -71,11 +71,14 @@ export function CollaborationPlugin({ id, historyState, username }: { id: string
   const providerFactory = useMemo(() => (docId: string, yjsDocMap: Map<string, any>) => {
     const provider = createWebsocketProvider(docId, yjsDocMap);
     provider.awareness.on('change', () => {
-      const collaborators = Array.from(provider.awareness.getStates().entries()).map(([clientId, state]) => ({
-        clientId,
-        name: state.user?.name || 'Anonymous',
-        color: state.user?.color || '#000000',
-      }));
+      const collaborators = Array.from(provider.awareness.getStates().entries()).map(([clientId, state]) => {
+        const user = (state as any).user;
+        return {
+          clientId,
+          name: user?.name || 'Anonymous',
+          color: user?.color || '#000000',
+        };
+      });
       setCollaborators(collaborators);
     });
     return provider;
