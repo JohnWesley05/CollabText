@@ -2,18 +2,24 @@
 
 import React, { createContext, useContext, useState, ReactNode } from 'react';
 
+export type Collaborator = {
+  clientId: number;
+  name: string;
+  color: string;
+};
+
 type CollaborationContextType = {
-  collaboratorCount: number;
-  setCollaboratorCount: (count: number) => void;
+  collaborators: Collaborator[];
+  setCollaborators: (collaborators: Collaborator[]) => void;
 };
 
 const CollaborationContext = createContext<CollaborationContextType | undefined>(undefined);
 
 export function CollaborationProvider({ children }: { children: ReactNode }) {
-  const [collaboratorCount, setCollaboratorCount] = useState(1); // Start with 1 for the current user
+  const [collaborators, setCollaborators] = useState<Collaborator[]>([]);
 
   return (
-    <CollaborationContext.Provider value={{ collaboratorCount, setCollaboratorCount }}>
+    <CollaborationContext.Provider value={{ collaborators, setCollaborators }}>
       {children}
     </CollaborationContext.Provider>
   );

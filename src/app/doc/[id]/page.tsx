@@ -2,20 +2,36 @@
 
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
-import { ChevronLeft, PenSquare, Users } from 'lucide-react';
+import { ChevronLeft, PenSquare } from 'lucide-react';
 import CollabEditor from '@/components/CollabEditor';
 import { Button } from '@/components/ui/button';
 import { ThemeToggle } from '@/components/theme-toggle';
 import { CollaborationProvider, useCollaboration } from '@/context/CollaborationContext';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 function CollaboratorIndicator() {
-  const { collaboratorCount } = useCollaboration();
+  const { collaborators } = useCollaboration();
 
   return (
-    <div className="flex items-center gap-1.5 py-1.5 px-3 rounded-lg bg-muted shadow-inner">
-      <Users className="w-5 h-5 text-muted-foreground" />
-      <span className="font-semibold text-muted-foreground">{collaboratorCount}</span>
-    </div>
+    <TooltipProvider delayDuration={0}>
+      <div className="flex items-center -space-x-2">
+        {collaborators.map((collaborator) => (
+          <Tooltip key={collaborator.clientId}>
+            <TooltipTrigger asChild>
+              <Avatar className="border-2 border-background cursor-pointer">
+                <AvatarFallback style={{ backgroundColor: collaborator.color, color: 'white' }}>
+                  {collaborator.name.charAt(0).toUpperCase()}
+                </AvatarFallback>
+              </Avatar>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>{collaborator.name}</p>
+            </TooltipContent>
+          </Tooltip>
+        ))}
+      </div>
+    </TooltipProvider>
   );
 }
 

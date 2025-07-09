@@ -48,7 +48,7 @@ const initialEditorState = (editor: LexicalEditor): void => {
 
 export function CollaborationPlugin({ id, historyState }: { id: string, historyState: HistoryState }) {
   const [editor] = useLexicalComposerContext();
-  const { setCollaboratorCount } = useCollaboration();
+  const { setCollaborators } = useCollaboration();
 
   const { name, color } = useMemo(() => randomUser(), []);
 
@@ -65,10 +65,15 @@ export function CollaborationPlugin({ id, historyState }: { id: string, historyS
   const providerFactory = useMemo(() => (docId: string, yjsDocMap: Map<string, any>) => {
     const provider = createWebsocketProvider(docId, yjsDocMap);
     provider.awareness.on('change', () => {
-      setCollaboratorCount(provider.awareness.getStates().size);
+      const collaborators = Array.from(provider.awareness.getStates().entries()).map(([clientId, state]) => ({
+        clientId,
+        name: state.user?.name || 'Anonymous',
+        color: state.user?.color || '#000000',
+      }));
+      setCollaborators(collaborators);
     });
     return provider;
-  }, [setCollaboratorCount]);
+  }, [setCollaborators]);
 
 
   return (
