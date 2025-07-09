@@ -1,23 +1,31 @@
+
 'use client';
 
+import { useMemo } from 'react';
 import { LexicalComposer } from '@lexical/react/LexicalComposer';
 import { RichTextPlugin } from '@lexical/react/LexicalRichTextPlugin';
 import { ContentEditable } from '@lexical/react/LexicalContentEditable';
 import { AutoFocusPlugin } from '@lexical/react/LexicalAutoFocusPlugin';
 import LexicalErrorBoundary from '@lexical/react/LexicalErrorBoundary';
+import { HistoryPlugin, createEmptyHistoryState } from '@lexical/react/LexicalHistoryPlugin';
+import { CollaborationPlugin } from '@lexical/react/LexicalCollaborationPlugin';
 
 import { EditorNodes } from '@/lib/editor-nodes';
 import { EditorTheme } from '@/lib/editor-theme';
 import ToolbarPlugin from './plugins/ToolbarPlugin';
-import { CollaborationPlugin } from './plugins/CollaborationPlugin';
+import { createWebsocketProvider, randomUser } from '@/lib/collaboration';
+import AwarenessPlugin from './plugins/AwarenessPlugin';
+
 
 function Placeholder() {
   return <div className="absolute top-4 left-4 text-muted-foreground pointer-events-none">Start typing...</div>;
 }
 
+const initialEditorState = null;
+
 export default function CollabEditor({ docId, username }: { docId: string; username?: string }) {
   const initialConfig = {
-    editorState: undefined,
+    editorState: initialEditorState,
     namespace: 'CollabTextEditor',
     nodes: [...EditorNodes],
     onError: (error: Error) => {
@@ -25,6 +33,11 @@ export default function CollabEditor({ docId, username }: { docId: string; usern
     },
     theme: EditorTheme,
   };
+  
+  const historyState = useMemo(() => createEmptyHistoryState(), []);
+  
+  const { name, color } = useMemo(() => randomUser(), []);
+  const collabUsername = username || name;
 
   return (
     <LexicalComposer initialConfig={initialConfig}>
@@ -39,7 +52,18 @@ export default function CollabEditor({ docId, username }: { docId: string; usern
             ErrorBoundary={LexicalErrorBoundary}
           />
           <AutoFocusPlugin />
-          <CollaborationPlugin id={docId} username={username} />
+          <HistoryPlugin externalHistoryState={historyState} />
+          <CollaborationPlugin
+            id={docId}
+            providerFactory={createWebsocketProvider}
+            initialEditorState={initialEditorState}
+            shouldBootstrap={true}
+            username={collabUsername}
+            cursorColor={color}
+            cursorsContainerRef={null}
+            historyState={historyState}
+          />
+          <AwarenessPlugin />
         </div>
       </div>
     </LexicalComposer>
