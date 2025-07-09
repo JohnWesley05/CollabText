@@ -1,17 +1,12 @@
 'use client';
 
 import Link from 'next/link';
+import { useParams } from 'next/navigation';
 import { ChevronLeft, PenSquare, Users } from 'lucide-react';
 import CollabEditor from '@/components/CollabEditor';
 import { Button } from '@/components/ui/button';
 import { ThemeToggle } from '@/components/theme-toggle';
 import { CollaborationProvider, useCollaboration } from '@/context/CollaborationContext';
-
-type DocPageProps = {
-  params: {
-    id: string;
-  };
-};
 
 function CollaboratorIndicator() {
   const { collaboratorCount } = useCollaboration();
@@ -24,7 +19,10 @@ function CollaboratorIndicator() {
   );
 }
 
-function DocPageContent({ id }: { id: string }) {
+function DocPageContent() {
+  const params = useParams();
+  const id = params.id as string;
+
   return (
     <div className="flex flex-col min-h-screen bg-background">
       <header className="sticky top-0 z-10 flex items-center justify-between px-4 py-2 border-b bg-background/80 backdrop-blur-sm">
@@ -55,12 +53,10 @@ function DocPageContent({ id }: { id: string }) {
   );
 }
 
-export default function DocPage({ params }: DocPageProps) {
-  const { id } = params;
-
+export default function DocPage() {
   return (
     <CollaborationProvider>
-      <DocPageContent id={id} />
+      <DocPageContent />
     </CollaborationProvider>
   );
 }
