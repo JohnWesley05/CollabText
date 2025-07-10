@@ -19,17 +19,21 @@ import { ThemeToggle } from '@/components/theme-toggle';
 
 export default function Home() {
   const [docId, setDocId] = useState('');
+  const [name, setName] = useState('');
   const router = useRouter();
 
   const handleJoinRoom = () => {
     if (docId.trim()) {
-      router.push(`/doc/${docId.trim()}`);
+      const url = name.trim() ? `/doc/${docId.trim()}?name=${encodeURIComponent(name.trim())}` : `/doc/${docId.trim()}`;
+      router.push(url);
     }
   };
   
   const handleCreateRoom = () => {
-    const newDocId = Math.random().toString(36).substring(2, 10);
-    router.push(`/doc/${newDocId}`);
+    if (name.trim()) {
+      const newDocId = Math.random().toString(36).substring(2, 10);
+      router.push(`/doc/${newDocId}?name=${encodeURIComponent(name.trim())}`);
+    }
   }
 
   return (
@@ -44,11 +48,20 @@ export default function Home() {
             <CardTitle className="text-3xl font-headline">CollabText</CardTitle>
           </div>
           <CardDescription>
-            Enter a document ID to join an existing session or create a new one.
+            Enter your name, then join an existing document or create a new one.
           </CardDescription>
         </CardHeader>
         <CardContent>
           <div className="grid w-full items-center gap-4">
+            <div className="flex flex-col space-y-1.5">
+              <Label htmlFor="name">Your Name</Label>
+              <Input
+                id="name"
+                placeholder="Enter your name"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+              />
+            </div>
             <div className="flex flex-col space-y-1.5">
               <Label htmlFor="docId">Document ID</Label>
               <Input
@@ -78,8 +91,9 @@ export default function Home() {
             onClick={handleCreateRoom}
             className="w-full"
             variant="secondary"
+            disabled={!name.trim()}
           >
-            Create a New Document
+            Create New Document with this Name
           </Button>
         </CardFooter>
       </Card>
