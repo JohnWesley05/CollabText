@@ -1,13 +1,13 @@
 
 'use client';
 
-import { useMemo } from 'react';
+import { useMemo, useEffect } from 'react';
 import { LexicalComposer } from '@lexical/react/LexicalComposer';
 import { RichTextPlugin } from '@lexical/react/LexicalRichTextPlugin';
 import { ContentEditable } from '@lexical/react/LexicalContentEditable';
 import { AutoFocusPlugin } from '@lexical/react/LexicalAutoFocusPlugin';
 import LexicalErrorBoundary from '@lexical/react/LexicalErrorBoundary';
-import { HistoryPlugin, createEmptyHistoryState } from '@lexical/react/LexicalHistoryPlugin';
+import { HistoryPlugin } from '@lexical/react/LexicalHistoryPlugin';
 import { CollaborationPlugin } from '@lexical/react/LexicalCollaborationPlugin';
 
 import { EditorNodes } from '@/lib/editor-nodes';
@@ -42,8 +42,6 @@ export default function CollabEditor({ docId, username }: { docId: string; usern
     theme: EditorTheme,
   };
   
-  const historyState = useMemo(() => createEmptyHistoryState(), []);
-  
   const { name, color } = useMemo(() => randomUser(), []);
   const collabUsername = username || name;
 
@@ -60,15 +58,12 @@ export default function CollabEditor({ docId, username }: { docId: string; usern
             ErrorBoundary={LexicalErrorBoundary}
           />
           <AutoFocusPlugin />
-          <HistoryPlugin externalHistoryState={historyState} />
+          <HistoryPlugin />
           <CollaborationPlugin
             id={docId}
-            providerFactory={createWebsocketProvider}
+            providerFactory={(id, yjsDocMap) => createWebsocketProvider(id, yjsDocMap, { name: collabUsername, color })}
             initialEditorState={initialEditorState}
             shouldBootstrap={true}
-            username={collabUsername}
-            cursorColor={color}
-            cursorsContainerRef={null}
           />
           <AwarenessPlugin />
         </div>

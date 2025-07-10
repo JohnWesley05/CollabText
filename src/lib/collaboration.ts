@@ -15,19 +15,24 @@ export const randomUser = () => ({
 // Note: Using a public demo server. For production, you should host your own y-websocket server.
 const WEBSOCKET_SERVER_URL = 'wss://demos.yjs.dev';
 
-export function createWebsocketProvider(id: string, yjsDocMap: Map<string, Y.Doc>) {
+export function createWebsocketProvider(
+    id: string, 
+    yjsDocMap: Map<string, Y.Doc>,
+    user: { name: string; color: string }
+) {
   let doc = yjsDocMap.get(id);
   if (doc === undefined) {
     doc = new Y.Doc();
     yjsDocMap.set(id, doc);
   }
 
-  // The 'y-websocket' package handles awareness updates automatically.
-  // The provider will have an `awareness` property that the CollaborationPlugin can use.
   const provider = new WebsocketProvider(WEBSOCKET_SERVER_URL, id, doc);
 
-  // The connect() and disconnect() methods are handled by the WebsocketProvider constructor
-  // and its destroy() method, which Lexical's CollaborationPlugin will call on unmount.
+  // Set the user's awareness state (name and cursor color)
+  provider.awareness.setLocalStateField('user', {
+    name: user.name,
+    color: user.color,
+  });
 
   return provider;
 }
