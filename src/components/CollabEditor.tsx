@@ -15,13 +15,21 @@ import { EditorTheme } from '@/lib/editor-theme';
 import ToolbarPlugin from './plugins/ToolbarPlugin';
 import { createWebsocketProvider, randomUser } from '@/lib/collaboration';
 import AwarenessPlugin from './plugins/AwarenessPlugin';
+import { $createParagraphNode, $getRoot } from 'lexical';
 
 
 function Placeholder() {
   return <div className="absolute top-4 left-4 text-muted-foreground pointer-events-none">Start typing...</div>;
 }
 
-const initialEditorState = null;
+const initialEditorState = (editor: any) => {
+    const root = $getRoot();
+    if (root.isEmpty()) {
+        root.append(
+            $createParagraphNode()
+        );
+    }
+};
 
 export default function CollabEditor({ docId, username }: { docId: string; username?: string }) {
   const initialConfig = {
@@ -61,7 +69,6 @@ export default function CollabEditor({ docId, username }: { docId: string; usern
             username={collabUsername}
             cursorColor={color}
             cursorsContainerRef={null}
-            historyState={historyState}
           />
           <AwarenessPlugin />
         </div>
