@@ -30,12 +30,12 @@ export default function AwarenessPlugin() {
       setCollaborators(collaborators);
     };
 
-    awareness.on('change', onAwarenessChange);
+    awareness.on('update', onAwarenessChange);
     // Set initial collaborators
     onAwarenessChange();
 
     return () => {
-      awareness.off('change', onAwarenessChange);
+      awareness.off('update', onAwarenessChange);
     };
   }, [provider, setCollaborators]);
 
