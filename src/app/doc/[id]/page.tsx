@@ -42,7 +42,7 @@ function DocPageContent() {
   const username = searchParams.get('name') || undefined;
 
   return (
-    <div className="flex flex-col min-h-screen bg-background">
+    <div className="flex flex-col h-screen bg-background">
       <header className="sticky top-0 z-10 flex items-center justify-between px-4 py-2 border-b bg-background/80 backdrop-blur-sm">
         <div className="flex items-center gap-2">
             <Button asChild variant="ghost" size="icon">
@@ -61,10 +61,12 @@ function DocPageContent() {
           <ThemeToggle />
         </div>
       </header>
-      <main className="flex-grow p-4 md:p-6 lg:p-8">
-        <div className="max-w-4xl mx-auto">
+      <main className="flex-grow p-4 md:p-6 lg:p-8 flex flex-col">
+        <div className="max-w-4xl mx-auto w-full flex flex-col flex-grow">
           <h1 className="text-4xl font-bold tracking-tight mb-4 text-foreground capitalize font-headline">{id}</h1>
-          <CollabEditor docId={id} username={username} />
+          <div className="flex-grow flex flex-col">
+            <CollabEditor docId={id} username={username} />
+          </div>
         </div>
       </main>
     </div>

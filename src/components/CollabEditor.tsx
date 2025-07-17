@@ -16,6 +16,7 @@ import { EditorTheme } from '@/lib/editor-theme';
 import ToolbarPlugin from './plugins/ToolbarPlugin';
 import { createWebsocketProvider, randomUser } from '@/lib/collaboration';
 import AwarenessPlugin from './plugins/AwarenessPlugin';
+import { ScrollArea } from './ui/scroll-area';
 
 
 function Placeholder() {
@@ -47,16 +48,18 @@ export default function CollabEditor({ docId, username }: { docId: string; usern
   
   return (
     <LexicalComposer initialConfig={initialConfig}>
-      <div className="bg-card rounded-lg shadow-lg border">
+      <div className="bg-card rounded-lg shadow-lg border flex flex-col flex-grow">
         <ToolbarPlugin />
-        <div className="relative">
-          <RichTextPlugin
-            contentEditable={
-              <ContentEditable className="min-h-[600px] p-4 outline-none resize-none" />
-            }
-            placeholder={<Placeholder />}
-            ErrorBoundary={LexicalErrorBoundary}
-          />
+        <div className="relative flex-grow flex flex-col">
+          <ScrollArea className="flex-grow">
+            <RichTextPlugin
+              contentEditable={
+                <ContentEditable className="h-full p-4 outline-none resize-none" />
+              }
+              placeholder={<Placeholder />}
+              ErrorBoundary={LexicalErrorBoundary}
+            />
+          </ScrollArea>
           <AutoFocusPlugin />
           <HistoryPlugin />
           <CollaborationPlugin
