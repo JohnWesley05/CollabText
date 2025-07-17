@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useMemo, useEffect } from 'react';
+import { useMemo } from 'react';
 import { LexicalComposer } from '@lexical/react/LexicalComposer';
 import { RichTextPlugin } from '@lexical/react/LexicalRichTextPlugin';
 import { ContentEditable } from '@lexical/react/LexicalContentEditable';
@@ -9,13 +9,13 @@ import { AutoFocusPlugin } from '@lexical/react/LexicalAutoFocusPlugin';
 import LexicalErrorBoundary from '@lexical/react/LexicalErrorBoundary';
 import { HistoryPlugin } from '@lexical/react/LexicalHistoryPlugin';
 import { CollaborationPlugin } from '@lexical/react/LexicalCollaborationPlugin';
+import { $createParagraphNode, $getRoot } from 'lexical';
 
 import { EditorNodes } from '@/lib/editor-nodes';
 import { EditorTheme } from '@/lib/editor-theme';
 import ToolbarPlugin from './plugins/ToolbarPlugin';
 import { createWebsocketProvider, randomUser } from '@/lib/collaboration';
 import AwarenessPlugin from './plugins/AwarenessPlugin';
-import { $createParagraphNode, $getRoot } from 'lexical';
 
 
 function Placeholder() {
@@ -44,7 +44,7 @@ export default function CollabEditor({ docId, username }: { docId: string; usern
   
   const { name, color } = useMemo(() => randomUser(), []);
   const collabUsername = username || name;
-
+  
   return (
     <LexicalComposer initialConfig={initialConfig}>
       <div className="bg-card rounded-lg shadow-lg border">
@@ -65,7 +65,7 @@ export default function CollabEditor({ docId, username }: { docId: string; usern
             initialEditorState={initialEditorState}
             shouldBootstrap={true}
           />
-          <AwarenessPlugin />
+          <AwarenessPlugin username={collabUsername} />
         </div>
       </div>
     </LexicalComposer>

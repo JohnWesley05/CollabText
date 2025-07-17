@@ -6,7 +6,7 @@ import { useCollaborationContext } from '@lexical/react/LexicalCollaborationCont
 import { useEffect } from 'react';
 import { useCollaboration } from '@/context/CollaborationContext';
 
-export default function AwarenessPlugin() {
+export default function AwarenessPlugin({ username }: { username: string }) {
   const [editor] = useLexicalComposerContext();
   const { provider } = useCollaborationContext();
   const { setCollaborators } = useCollaboration();
@@ -34,10 +34,19 @@ export default function AwarenessPlugin() {
     // Set initial collaborators
     onAwarenessChange();
 
+    // Update the local user's name if it changes
+    const localState = awareness.getLocalState();
+    if (localState?.user?.name !== username) {
+      awareness.setLocalStateField('user', {
+        ...localState?.user,
+        name: username,
+      });
+    }
+
     return () => {
       awareness.off('update', onAwarenessChange);
     };
-  }, [provider, setCollaborators]);
+  }, [provider, setCollaborators, username]);
 
   return null;
 }
