@@ -124,3 +124,8 @@ body {
 .y-cursor.hidden .y-cursor-name {
   opacity: 0;
 }
+
+.y-cursor-local .y-cursor-name {
+  opacity: 1;
+  display: inline-block;
+}
