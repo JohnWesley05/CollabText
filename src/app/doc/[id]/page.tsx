@@ -3,14 +3,13 @@
 
 import Link from 'next/link';
 import { useParams, useSearchParams } from 'next/navigation';
-import { ChevronLeft, PenSquare, Share2 } from 'lucide-react';
+import { ChevronLeft, PenSquare } from 'lucide-react';
 import CollabEditor from '@/components/CollabEditor';
 import { Button } from '@/components/ui/button';
 import { ThemeToggle } from '@/components/theme-toggle';
 import { CollaborationProvider, useCollaboration } from '@/context/CollaborationContext';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { useToast } from '@/hooks/use-toast';
 
 function CollaboratorIndicator() {
   const { collaborators } = useCollaboration();
@@ -40,25 +39,8 @@ function CollaboratorIndicator() {
 function DocPageContent() {
   const params = useParams();
   const searchParams = useSearchParams();
-  const { toast } = useToast();
   const id = params.id as string;
   const username = searchParams.get('name') || undefined;
-
-  const handleCopyLink = () => {
-    const url = window.location.href;
-    navigator.clipboard.writeText(url).then(() => {
-      toast({
-        title: "Link Copied!",
-        description: "You can now share this link with others.",
-      });
-    }, (err) => {
-      toast({
-        title: "Failed to copy",
-        description: "Could not copy the link to your clipboard.",
-        variant: "destructive",
-      });
-    });
-  };
 
   return (
     <div className="flex flex-col h-screen bg-background">
@@ -77,10 +59,6 @@ function DocPageContent() {
           <div className="text-sm text-muted-foreground hidden md:block">
             Document ID: <span className="font-mono p-1 rounded-md bg-muted">{id}</span>
           </div>
-          <Button variant="outline" size="sm" onClick={handleCopyLink}>
-            <Share2 className="mr-2 h-4 w-4" />
-            Copy Link
-          </Button>
           <ThemeToggle />
         </div>
       </header>
