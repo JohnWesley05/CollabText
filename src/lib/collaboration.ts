@@ -12,8 +12,11 @@ export const randomUser = () => ({
   color: USER_COLORS[Math.floor(Math.random() * USER_COLORS.length)],
 });
 
-// Note: Using a public demo server. For production, you should host your own y-websocket server.
-const WEBSOCKET_SERVER_URL = 'wss://demos.yjs.dev';
+// Update the URL to point to the local backend server.
+// Note: This uses 'ws' instead of 'wss' for local, unencrypted connection.
+const WEBSOCKET_SERVER_URL = process.env.NODE_ENV === 'production' 
+    ? 'wss://your-production-websocket-url' // Replace with your deployed backend URL
+    : 'ws://localhost:8080';
 
 export function createWebsocketProvider(
     id: string, 
@@ -26,7 +29,9 @@ export function createWebsocketProvider(
     yjsDocMap.set(id, doc);
   }
 
-  const provider = new WebsocketProvider(WEBSOCKET_SERVER_URL, id, doc);
+  const provider = new WebsocketProvider(WEBSOCKET_SERVER_URL, id, doc, {
+    params: {},
+  });
 
   // Set the user's awareness state (name and cursor color)
   provider.awareness.setLocalStateField('user', {
